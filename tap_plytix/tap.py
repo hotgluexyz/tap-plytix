@@ -7,11 +7,13 @@ from hotglue_singer_sdk import typing as th  # JSON schema typing helpers
 from typing_extensions import override
 
 from tap_plytix.streams import (
+    ProductDetailsStream,
     ProductsStream,
 )
 
 STREAM_TYPES = [
     ProductsStream,
+    ProductDetailsStream,
 ]
 
 

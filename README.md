@@ -19,6 +19,7 @@ A [Singer](https://www.singer.io/) tap that extracts data from **Plytix**. It is
 | Stream | Endpoint / notes | Primary key | Replication key |
 | ------ | ---------------- | ----------- | ----------------- |
 | `products` | `POST` `/products/search` (pagination in JSON body) | `id` | `modified` |
+| `product_details` | `GET` `/products/{product_id}` (child of `products`) | `id` | — |
 
 Pagination uses `pagination.page` and `pagination.page_size` in the request body (default page size 100). The API returns `data` records and a `pagination` object with `total_count`. Rate limits depend on your Plytix plan (HTTP 429 when exceeded).
 

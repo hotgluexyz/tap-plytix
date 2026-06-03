@@ -35,7 +35,7 @@
                 "--catalog",
                 "catalog-selected.json",
                 ">",
-                "data.txt"
+                "data.singer"
             ],
             "console": "integratedTerminal",
             "python": "${workspaceFolder}/.venv/bin/python3"
