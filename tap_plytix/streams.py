@@ -2,31 +2,73 @@
 
 from __future__ import annotations
 
-from hotglue_singer_sdk import typing as th  # JSON Schema typing helpers
+from typing import Any
+
+import requests
+from hotglue_singer_sdk import typing as th
+from typing_extensions import override
 
 from tap_plytix.client import PlytixStream
 
+PAGE_SIZE = 100
+
 
 class ProductsStream(PlytixStream):
-    """Stream for ``products``."""
+    """Products via POST ``/products/search``."""
 
     name = "products"
-    path = "/products"
-    # TODO: Replace with your actual primary key column name(s).
+    path = "/products/search"
+    rest_method = "POST"
     primary_keys = ["id"]
-    # TODO: Replace with your actual replication key, or set to None if not incremental.
-    replication_key = "modified_at"
-    # TODO: Replace with your actual schema.
+    replication_key = None
+
     schema = th.PropertiesList(
-        # TODO: Add the rest of the properties / fields from the API response (types, nested objects, etc.).
+        th.Property("id", th.StringType),
+        th.Property("sku", th.StringType),
+        th.Property("label", th.StringType),
+        th.Property("status", th.StringType),
+        th.Property("modified", th.DateTimeType),
+        th.Property("created", th.DateTimeType),
+        th.Property("num_variations", th.IntegerType),
+        th.Property("_parent_id", th.StringType),
+        th.Property("product_family_id", th.StringType),
+        th.Property("product_family_model_id", th.StringType),
+        th.Property("modified_user_audit", th.CustomType({"type": "object"})),
+        th.Property("overwritten_attributes", th.CustomType({"type": "object"})),
+        th.Property("categories", th.CustomType({"type": "array"})),
         th.Property(
-            "id",
-            th.StringType,
-            description="TODO: Replace with your actual primary key field and type.",
+            "thumbnail",
+            th.ObjectType(th.Property("id", th.StringType)),
         ),
-        th.Property(
-            "modified_at",
-            th.DateTimeType,
-            description="TODO: Replace with your actual replication key field and type (or remove if full-table).",
-        ),
+        th.Property("attributes", th.CustomType({"type": "object"})),
     ).to_dict()
+
+    @override
+    def prepare_request_payload(
+        self,
+        context: dict | None,
+        next_page_token: Any | None,
+    ) -> dict:
+        page = 1 if next_page_token is None else int(next_page_token)
+        payload: dict[str, Any] = {
+            "pagination": {
+                "page": page,
+                "page_size": PAGE_SIZE,
+                "order": "modified",
+            },
+        }
+        return payload
+
+    @override
+    def get_next_page_token(
+        self,
+        response: requests.Response,
+        previous_token: Any | None,
+    ) -> Any | None:
+        pagination = response.json().get("pagination") or {}
+        page = int(pagination.get("page") or 1)
+        page_size = int(pagination.get("page_size") or PAGE_SIZE)
+        total_count = int(pagination.get("total_count") or 0)
+        if page * page_size >= total_count:
+            return None
+        return page + 1

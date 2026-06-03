@@ -20,7 +20,6 @@ class TapPlytix(Tap):
 
     name = "tap-plytix"
 
-    # TODO: Update this section with the actual config values you expect:
     config_jsonschema = th.PropertiesList(
         th.Property(
             "start_date",
@@ -35,10 +34,16 @@ class TapPlytix(Tap):
             default="https://pim.plytix.com/api/v1",
         ),
         th.Property(
-            "access_key",
+            "plytix_api_key",
             th.StringType,
             required=True,
-            description="The access key to authenticate against Plytix",
+            description="Plytix API key",
+        ),
+        th.Property(
+            "plytix_api_password",
+            th.StringType,
+            required=True,
+            description="Plytix API password",
         ),
     ).to_dict()
 

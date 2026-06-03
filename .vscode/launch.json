@@ -33,7 +33,7 @@
                 "--state",
                 "state.json",
                 "--catalog",
-                "selected-catalog.json",
+                "catalog-selected.json",
                 ">",
                 "data.txt"
             ],

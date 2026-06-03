@@ -1,3 +1,7 @@
+**This tap is in alpha**. Known issues:
+- Products are currently full synced
+
+
 # tap-plytix
 
 A [Singer](https://www.singer.io/) tap that extracts data from **Plytix**. It is built with [hotglue-singer-sdk](https://github.com/hotgluexyz/HotglueSingerSDK) and speaks the standard Singer message protocol on stdout, so you can pair it with any compatible target.
@@ -5,18 +9,18 @@ A [Singer](https://www.singer.io/) tap that extracts data from **Plytix**. It is
 ## Features
 
 - **REST**-style HTTP streams (see `client.py` / `streams.py`).
-- **Bearer** token authentication.
+- API key/password authentication.
 
 - Configurable **`api_url`** and optional **`start_date`** (see [Configuration](#configuration)).
-- Incremental sync is scaffolded with placeholder **`id`** (primary key) and **`modified_at`** (replication key); replace with real fields per stream in `streams.py`.
+- Incremental sync on **`products`** filters by **`modified`** using the tap **`start_date`** / stream bookmark.
 
 ### Streams
 
 | Stream | Endpoint / notes | Primary key | Replication key |
 | ------ | ---------------- | ----------- | ----------------- |
-| `products` | `GET` + `/products` (default path; TODO: confirm with API) | `id` (TODO) | `modified_at` (TODO) |
+| `products` | `POST` `/products/search` (pagination in JSON body) | `id` | `modified` |
 
-TODO: Describe pagination, rate limits, and any stream-specific query parameters in this section.
+Pagination uses `pagination.page` and `pagination.page_size` in the request body (default page size 100). The API returns `data` records and a `pagination` object with `total_count`. Rate limits depend on your Plytix plan (HTTP 429 when exceeded).
 
 ## Requirements
 
@@ -53,7 +57,8 @@ tap-plytix --help
 | ------- | ---- | -------- | ------- | ----------- |
 | `start_date` | string (datetime) | no | `2000-01-01T00:00:00Z` | Earliest record date to sync. |
 | `api_url` | string | no | `https://pim.plytix.com/api/v1` | Base URL for the API. |
-| `access_key` | string | yes | — | API credential (adjust name/location in code if your API differs). |
+| `plytix_api_key` | string | yes | — | Plytix API key. |
+| `plytix_api_password` | string | yes | — | Plytix API password. |
 
 Run `tap-plytix --about` (or `tap-plytix --about --format=markdown`) for the authoritative schema for your installed version.
 
@@ -63,7 +68,8 @@ Run `tap-plytix --about` (or `tap-plytix --about --format=markdown`) for the aut
 {
   "start_date": "2000-01-01T00:00:00Z",
   "api_url": "https://pim.plytix.com/api/v1",
-  "access_key": "YOUR_ACCESS_KEY"
+  "plytix_api_key": "YOUR_API_KEY",
+  "plytix_api_password": "YOUR_API_PASSWORD"
 }
 ```
 
