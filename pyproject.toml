@@ -1,9 +1,6 @@
 [build-system]
-requires = [
-    "hatchling>=1,<2",
-    "hatch-vcs>=0.5",
-]
-build-backend = "hatchling.build"
+requires = ["poetry-core>=1.0.8"]
+build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "tap-plytix"
@@ -52,9 +49,7 @@ typing = [
     "types-requests",
 ]
 
-[tool.hatch.version]
-fallback-version = "0.1.0.dev0"
-source = "vcs"
+
 
 [tool.mypy]
 enable_error_code = [
