@@ -1,55 +1,37 @@
-[build-system]
-requires = ["poetry-core>=1.0.8"]
-build-backend = "poetry.core.masonry.api"
-
-[project]
+[tool.poetry]
 name = "tap-plytix"
-dynamic = ["version"]
-description = "Singer tap for Plytix, built with Hotglue's hotglue_singer_sdk."
-readme = "README.md"
-authors = [{ name = "Hotglue"}]
+version = "0.0.1"
+description = "`tap-plytix` is a Singer tap for Plytix, built with Hotglue's hotglue_singer_sdk."
+authors = ["Hotglue"]
 keywords = [
     "ELT",
     "Plytix",
 ]
-classifiers = [
-    "Intended Audience :: Developers",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
-]
-license = "Apache-2.0"
-license-files = [ "LICENSE" ]
-requires-python = ">=3.10"
-dependencies = [
-    "hotglue-singer-sdk>=1.0.26",
-    "requests~=2.33.0",
-    "typing-extensions>=4.5.0; python_version < '3.13'",
-]
+license = "Apache 2.0"
+readme = "README.md"
 
-[project.optional-dependencies]
-s3 = [
-    "s3fs>=2026.1.0",
-]
+[tool.poetry.dependencies]
+python = ">=3.10,<3.14"
+requests = "^2.33.0"
+hotglue-singer-sdk = "^1.0.26"
+typing-extensions = { version = ">=4.5.0", python = "<3.13" }
+s3fs = { version = ">=2026.1.0", optional = true }
 
-[project.scripts]
-# CLI declaration
-tap-plytix = 'tap_plytix.tap:TapPlytix.cli'
+[tool.poetry.extras]
+s3 = ["s3fs"]
 
-[dependency-groups]
-dev = [
-    { include-group = "test" },
-]
-test = [
-    "pytest>=9",
-    "hotglue-singer-sdk",
-]
-typing = [
-    "mypy>=1.19.1",
-    "ty>=0.0.18",
-    "types-requests",
-]
+[tool.poetry.dev-dependencies]
+pytest = "^9"
+mypy = "^1.19.1"
+ty = "^0.0.18"
+types-requests = "*"
 
+[build-system]
+requires = ["poetry-core>=1.0.8"]
+build-backend = "poetry.core.masonry.api"
 
+[tool.poetry.scripts]
+tap-plytix = "tap_plytix.tap:TapPlytix.cli"
 
 [tool.mypy]
 enable_error_code = [
@@ -81,7 +63,6 @@ testpaths = [
     "tests",
 ]
 
-# This configuration can be used to customize tox environments
 [tool.tox]
 requires = [
     "tox>=4.43",
@@ -99,7 +80,6 @@ runner = "uv-venv-runner"
 pass_env = [
     "TAP_PLYTIX_*",
 ]
-dependency_groups = [ "test" ]
 commands = [ [ "pytest", { replace = "posargs", default = [ "tests" ], extend = true } ] ]
 
 [tool.tox.env.lint]
@@ -114,7 +94,12 @@ commands = [
 
 [tool.tox.env.typing]
 description = "type checks"
-dependency_groups = [ "test", "typing" ]
+deps = [
+    "-e .",
+    "mypy>=1.19.1",
+    "ty>=0.0.18",
+    "types-requests",
+]
 commands = [
     [ "mypy", { replace = "posargs", default = [ "tap_plytix", "tests" ], extend = true } ],
     [ "ty", "check", { replace = "posargs", default = [ "tap_plytix", "tests" ], extend = true } ],
